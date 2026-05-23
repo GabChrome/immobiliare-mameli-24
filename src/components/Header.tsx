@@ -31,11 +31,13 @@ export const Header: React.FC<HeaderProps> = ({ currentPage, onPageChange, onVal
     { label: 'Contatti', id: 'contact' as const, icon: PhoneCall },
   ];
 
+  const isSolid = isScrolled || currentPage !== 'home';
+
   return (
     <>
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
+          isSolid
             ? 'bg-primary/95 backdrop-blur-md py-3 shadow-glass border-b border-white/10 text-white'
             : 'bg-transparent py-5 text-white'
         }`}
