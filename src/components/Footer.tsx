@@ -10,7 +10,12 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onPageChange: (page: 'home' | 'about' | 'contact') => void;
+  onValuateClick: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onPageChange, onValuateClick }) => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,7 +48,7 @@ export const Footer: React.FC = () => {
   return (
     <footer id="footer" className="bg-primary-dark text-white border-t border-white/10 relative overflow-hidden">
       {/* Subtle lighting overlay */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(19,64,116,0.15),transparent_40%)] pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,168,232,0.1),transparent_40%)] pointer-events-none" />
 
       {/* Main Footer Links & Info Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 relative z-10">
@@ -51,7 +56,10 @@ export const Footer: React.FC = () => {
           
           {/* Column 1: Brand Info */}
           <div className="flex flex-col gap-5">
-            <a href="/" className="flex items-center gap-2">
+            <button 
+              onClick={() => { onPageChange('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              className="flex items-center gap-2 text-left cursor-pointer"
+            >
               <div className="w-9 h-9 rounded bg-accent flex items-center justify-center text-primary-dark font-extrabold text-lg">
                 M
               </div>
@@ -63,7 +71,7 @@ export const Footer: React.FC = () => {
                   Immobiliare
                 </span>
               </div>
-            </a>
+            </button>
             
             <p className="text-neutral-400 text-[11px] sm:text-xs leading-relaxed font-light">
               Siamo l'agenzia leader per la vendita rapida di immobili residenziali a Busto Arsizio, Gallarate e Milano. Connessione, innovazione e affidabilità da oltre 15 anni.
@@ -92,21 +100,33 @@ export const Footer: React.FC = () => {
           {/* Column 2: Navigation links */}
           <div className="flex flex-col gap-4">
             <h4 className="font-bold text-xs uppercase tracking-wider text-accent border-b border-white/5 pb-2">
-              Collegamenti Utili
+              Menu Principale
             </h4>
             <nav className="flex flex-col gap-3 text-neutral-400 text-xs font-light">
-              <a href="#immobili" className="hover:text-accent transition-colors flex items-center gap-1.5">
-                <span>Immobili in Vendita</span>
-              </a>
-              <a href="#immobili" className="hover:text-accent transition-colors flex items-center gap-1.5">
-                <span>Immobili in Affitto</span>
-              </a>
-              <a href="#chi-siamo" className="hover:text-accent transition-colors flex items-center gap-1.5">
+              <button 
+                onClick={() => { onPageChange('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className="hover:text-accent transition-colors flex items-center gap-1.5 text-left cursor-pointer"
+              >
+                <span>Home Page</span>
+              </button>
+              <button 
+                onClick={() => { onPageChange('about'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className="hover:text-accent transition-colors flex items-center gap-1.5 text-left cursor-pointer"
+              >
                 <span>Chi Siamo</span>
-              </a>
-              <a href="#valuta-casa" className="hover:text-accent transition-colors flex items-center gap-1.5">
-                <span>Valutazione Gratuita</span>
-              </a>
+              </button>
+              <button 
+                onClick={() => { onPageChange('contact'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                className="hover:text-accent transition-colors flex items-center gap-1.5 text-left cursor-pointer"
+              >
+                <span>Contatti</span>
+              </button>
+              <button 
+                onClick={onValuateClick}
+                className="hover:text-accent transition-colors flex items-center gap-1.5 text-left cursor-pointer"
+              >
+                <span>Valuta la tua Casa</span>
+              </button>
             </nav>
           </div>
 
@@ -166,7 +186,7 @@ export const Footer: React.FC = () => {
                     <button 
                       type="submit" 
                       disabled={isSubmitting}
-                      className="absolute right-1 p-1.5 rounded-lg bg-accent text-primary-dark hover:bg-accent-hover transition-colors"
+                      className="absolute right-1 p-1.5 rounded-lg bg-accent text-primary-dark hover:bg-accent-hover transition-colors cursor-pointer"
                     >
                       <ArrowRight size={14} />
                     </button>
@@ -181,7 +201,7 @@ export const Footer: React.FC = () => {
                 >
                   <button
                     onClick={handleDownload}
-                    className="w-full py-2.5 rounded-xl bg-accent text-primary-dark font-bold text-xs flex items-center justify-center gap-2 hover:bg-accent-hover transition-colors shadow-accent animate-pulse"
+                    className="w-full py-2.5 rounded-xl bg-accent text-primary-dark font-black text-xs flex items-center justify-center gap-2 hover:bg-accent-hover transition-colors shadow-accent animate-pulse cursor-pointer"
                   >
                     <Download size={14} />
                     Scarica Guida (PDF)

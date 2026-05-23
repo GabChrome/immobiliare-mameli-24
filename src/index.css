@@ -3,41 +3,41 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #0B2545;
-  --color-primary-dark: #07162C;
-  --color-primary-light: #134074;
+  --color-primary: #0A2B5C; /* Deep Corporate Navy */
+  --color-primary-dark: #051630;
+  --color-primary-light: #153E7A;
   
-  --color-accent: #D4AF37;
-  --color-accent-hover: #E5C453;
-  --color-accent-dark: #B3922E;
-  --color-accent-soft: #FBF8EE;
+  --color-accent: #00A8E8; /* Azzurro Mameli */
+  --color-accent-hover: #0084B4;
+  --color-accent-dark: #006085;
+  --color-accent-soft: #E6F6FD;
 
-  --color-navy-50: #F4F7FA;
-  --color-navy-100: #E8ECF2;
-  --color-navy-200: #D1DBE6;
-  --color-navy-300: #B0C2D6;
-  --color-navy-400: #87A4C4;
-  --color-navy-500: #6487AF;
-  --color-navy-600: #4C6E96;
-  --color-navy-700: #3D577A;
-  --color-navy-800: #0B2545;
-  --color-navy-900: #07162C;
+  --color-navy-50: #F0F6FA; /* Lightest Gray-Blue Background */
+  --color-navy-100: #E1EDF5;
+  --color-navy-200: #C2DBEB;
+  --color-navy-300: #93BED9;
+  --color-navy-400: #5D9CC5;
+  --color-navy-500: #387FB0;
+  --color-navy-600: #296693;
+  --color-navy-700: #225277;
+  --color-navy-800: #0A2B5C; /* Primary */
+  --color-navy-900: #051630; /* Primary Dark */
 
-  --color-neutral-50: #FAFBFD;
-  --color-neutral-100: #F3F4F6;
-  --color-neutral-200: #E5E7EB;
-  --color-neutral-300: #D1D5DB;
-  --color-neutral-450: #6B7280;
-  --color-neutral-800: #1F2937;
-  --color-neutral-900: #111827;
+  --color-neutral-50: #FFFFFF; /* Pure White background */
+  --color-neutral-100: #F8FAFC;
+  --color-neutral-200: #E2E8F0;
+  --color-neutral-300: #CBD5E1;
+  --color-neutral-450: #64748B;
+  --color-neutral-800: #1E293B;
+  --color-neutral-900: #0F172A;
 
   --font-sans: 'Poppins', 'Inter', sans-serif;
 
-  --shadow-premium: 0 10px 40px -10px rgba(11, 37, 69, 0.08);
-  --shadow-premium-hover: 0 20px 40px -12px rgba(11, 37, 69, 0.16);
-  --shadow-accent: 0 8px 24px -6px rgba(212, 175, 55, 0.3);
-  --shadow-accent-hover: 0 12px 28px -4px rgba(229, 196, 83, 0.45);
-  --shadow-glass: 0 8px 32px 0 rgba(11, 37, 69, 0.08);
+  --shadow-premium: 0 10px 40px -10px rgba(10, 43, 92, 0.08);
+  --shadow-premium-hover: 0 20px 40px -12px rgba(10, 43, 92, 0.16);
+  --shadow-accent: 0 8px 24px -6px rgba(0, 168, 232, 0.3);
+  --shadow-accent-hover: 0 12px 28px -4px rgba(0, 168, 232, 0.45);
+  --shadow-glass: 0 8px 32px 0 rgba(10, 43, 92, 0.08);
 }
 
 @layer base {
@@ -65,15 +65,15 @@ html {
 
 /* Custom glow animations and utilities */
 .glow-primary {
-  box-shadow: 0 0 40px -5px rgba(11, 37, 69, 0.15);
+  box-shadow: 0 0 40px -5px rgba(10, 43, 92, 0.15);
 }
 
 .glow-accent {
-  box-shadow: 0 0 30px -5px rgba(212, 175, 55, 0.25);
+  box-shadow: 0 0 30px -5px rgba(0, 168, 232, 0.25);
 }
 
 /* Map specific styling overrides if needed */
 .custom-map-container {
-  background-image: radial-gradient(circle, #e2e8f0 1.5px, transparent 1.5px);
+  background-image: radial-gradient(circle, #cbd5e1 1.5px, transparent 1.5px);
   background-size: 24px 24px;
 }
