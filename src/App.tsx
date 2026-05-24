@@ -4,6 +4,7 @@ import { Hero } from './components/Hero';
 import { FeaturedProperties } from './components/FeaturedProperties';
 import { MapPlaceholder } from './components/MapPlaceholder';
 import { ValutazioneForm } from './components/ValutazioneForm';
+import { CalcolatoreMutuo } from './components/CalcolatoreMutuo';
 import { ChiSiamoPage } from './components/ChiSiamoPage';
 import { ContattiPage } from './components/ContattiPage';
 import { Footer } from './components/Footer';
@@ -178,6 +179,9 @@ function App() {
                   />
                 )}
               </div>
+
+              {/* Mortgage Calculator Section */}
+              <CalcolatoreMutuo />
 
               {/* Lead Generation Section: Valuation Multi-step Form */}
               <div id="valuta-casa" className="scroll-mt-20">
