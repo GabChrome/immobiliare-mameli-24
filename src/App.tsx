@@ -145,6 +145,7 @@ function App() {
             >
               {/* Hero Header Section */}
               <Hero
+                filters={filters}
                 onSearch={handleSearchSubmit}
                 isMapActive={isMapActive}
                 onMapToggle={(active) => {

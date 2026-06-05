@@ -1,8 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MapPin, Building, Euro, Search, Map, RotateCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface SearchFiltersProps {
+  filters?: {
+    location: string;
+    type: string;
+    minPrice: string;
+    maxPrice: string;
+    contract: 'tutti' | 'vendita' | 'affitto';
+  };
   onSearch: (filters: { 
     location: string; 
     type: string; 
@@ -17,6 +24,7 @@ interface SearchFiltersProps {
 }
 
 export const SearchFilters: React.FC<SearchFiltersProps> = ({
+  filters,
   onSearch,
   isMapActive,
   onMapToggle,
@@ -26,6 +34,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
   const [type, setType] = useState(initialType);
   const [contract, setContract] = useState<'vendita' | 'affitto'>('vendita');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [overlapActive, setOverlapActive] = useState<'min' | 'max'>('max');
 
   // Boundary values depending on contract type
   const minLimit = contract === 'vendita' ? 50000 : 200;
@@ -34,6 +43,26 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
 
   const [minPrice, setMinPrice] = useState(minLimit);
   const [maxPrice, setMaxPrice] = useState(maxLimit);
+
+  // Sync internal state with external filters prop
+  useEffect(() => {
+    if (filters) {
+      // Don't overwrite if the user is focused on typing the location
+      if (document.activeElement?.getAttribute('placeholder') !== 'Dove vuoi cercare?') {
+        setLocation(filters.location || '');
+      }
+      setType(filters.type || '');
+      
+      const newContract = filters.contract === 'tutti' ? 'vendita' : filters.contract;
+      setContract(newContract);
+      
+      const newMinLimit = newContract === 'vendita' ? 50000 : 200;
+      const newMaxLimit = newContract === 'vendita' ? 1000000 : 5000;
+      
+      setMinPrice(filters.minPrice ? parseInt(filters.minPrice) : newMinLimit);
+      setMaxPrice(filters.maxPrice ? parseInt(filters.maxPrice) : newMaxLimit);
+    }
+  }, [filters]);
 
   const locations = ['Busto Arsizio', 'Gallarate', 'Milano', 'Legnano', 'Castellanza', 'Olgiate Olona'];
   
@@ -112,12 +141,25 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
   const minPercent = ((minPrice - minLimit) / (maxLimit - minLimit)) * 100;
   const maxPercent = ((maxPrice - minLimit) / (maxLimit - minLimit)) * 100;
 
+  // Track which slider should be on top based on mouse distance to values
+  const updateActiveThumb = (clientX: number, currentTarget: HTMLDivElement) => {
+    const rect = currentTarget.getBoundingClientRect();
+    const pct = (clientX - rect.left) / rect.width;
+    const hoverVal = minLimit + pct * (maxLimit - minLimit);
+    
+    if (Math.abs(hoverVal - minPrice) < Math.abs(hoverVal - maxPrice)) {
+      setOverlapActive('min');
+    } else {
+      setOverlapActive('max');
+    }
+  };
+
   return (
     <div className="w-full max-w-5xl mx-auto px-4">
       {/* Tab controls header row */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Vendita / Affitto Tabs */}
+          {/* Permanent tabs: Vendita / Affitto */}
           <div className="bg-primary-dark/40 backdrop-blur-md p-1 rounded-xl inline-flex border border-white/10">
             <button
               type="button"
@@ -263,7 +305,15 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
             </div>
             
             {/* Double slider component wrapper */}
-            <div className="relative w-full h-6 mt-1.5 flex items-center">
+            <div 
+              className="relative w-full h-6 mt-1.5 flex items-center"
+              onMouseMove={(e) => updateActiveThumb(e.clientX, e.currentTarget)}
+              onTouchStart={(e) => {
+                if (e.touches.length > 0) {
+                  updateActiveThumb(e.touches[0].clientX, e.currentTarget);
+                }
+              }}
+            >
               {/* Background Track */}
               <div className="absolute left-0 right-0 h-1.5 bg-neutral-200 rounded-lg pointer-events-none" />
               
@@ -285,7 +335,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                 value={minPrice}
                 onChange={handleMinChange}
                 className="range-slider-input w-full cursor-pointer"
-                style={{ zIndex: minPrice > maxLimit - (maxLimit - minLimit) * 0.1 ? 5 : 3 }}
+                style={{ zIndex: overlapActive === 'min' ? 5 : 3 }}
               />
               
               {/* Max Slider Input */}
@@ -297,7 +347,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                 value={maxPrice}
                 onChange={handleMaxChange}
                 className="range-slider-input w-full cursor-pointer"
-                style={{ zIndex: minPrice > maxLimit - (maxLimit - minLimit) * 0.1 ? 3 : 5 }}
+                style={{ zIndex: overlapActive === 'max' ? 5 : 3 }}
               />
             </div>
           </div>

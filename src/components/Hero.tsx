@@ -4,6 +4,13 @@ import { SearchFilters } from './SearchFilters';
 import { Video, Award } from 'lucide-react';
 
 interface HeroProps {
+  filters?: {
+    location: string;
+    type: string;
+    minPrice: string;
+    maxPrice: string;
+    contract: 'tutti' | 'vendita' | 'affitto';
+  };
   onSearch: (filters: { 
     location: string; 
     type: string; 
@@ -16,7 +23,7 @@ interface HeroProps {
   onMapToggle: (active: boolean) => void;
 }
 
-export const Hero: React.FC<HeroProps> = ({ onSearch, isMapActive, onMapToggle }) => {
+export const Hero: React.FC<HeroProps> = ({ filters, onSearch, isMapActive, onMapToggle }) => {
   return (
     <section className="relative min-h-[90vh] md:min-h-screen flex flex-col justify-center items-center pt-24 pb-12 overflow-hidden">
       {/* Background Image with elegant overlay gradient */}
@@ -93,6 +100,7 @@ export const Hero: React.FC<HeroProps> = ({ onSearch, isMapActive, onMapToggle }
           className="w-full mt-4"
         >
           <SearchFilters 
+            filters={filters}
             onSearch={onSearch}
             isMapActive={isMapActive}
             onMapToggle={onMapToggle}

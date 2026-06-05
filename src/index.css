@@ -82,7 +82,7 @@ html {
 .range-slider-input {
   position: absolute;
   width: 100%;
-  pointer-events: none;
+  pointer-events: auto;
   background: transparent;
   -webkit-appearance: none;
   appearance: none;
@@ -93,7 +93,6 @@ html {
 }
 
 .range-slider-input::-webkit-slider-thumb {
-  pointer-events: auto;
   -webkit-appearance: none;
   appearance: none;
   width: 18px;
@@ -116,7 +115,6 @@ html {
 }
 
 .range-slider-input::-moz-range-thumb {
-  pointer-events: auto;
   width: 18px;
   height: 18px;
   border-radius: 50%;
