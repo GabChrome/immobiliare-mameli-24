@@ -13,7 +13,7 @@ interface SearchFiltersProps {
     location: string; 
     type: string; 
     price: string; 
-    contract: 'vendita' | 'affitto'; 
+    contract: 'tutti' | 'vendita' | 'affitto'; 
     isMapActive: boolean; 
   }) => void;
   isMapActive: boolean;
@@ -30,7 +30,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
 }) => {
   const [location, setLocation] = useState('');
   const [type, setType] = useState(initialType);
-  const [contract, setContract] = useState<'vendita' | 'affitto'>('vendita');
+  const [contract, setContract] = useState<'tutti' | 'vendita' | 'affitto'>('tutti');
   const [price, setPrice] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
 
@@ -41,9 +41,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
         setLocation(filters.location || '');
       }
       setType(filters.type || '');
-      
-      const newContract = filters.contract === 'tutti' ? 'vendita' : filters.contract;
-      setContract(newContract);
+      setContract(filters.contract || 'tutti');
       setPrice(filters.price || '');
     }
   }, [filters]);
@@ -70,7 +68,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
     setShowSuggestions(false);
   };
 
-  const handleContractChange = (newContract: 'vendita' | 'affitto') => {
+  const handleContractChange = (newContract: 'tutti' | 'vendita' | 'affitto') => {
     setContract(newContract);
     setPrice(''); // Reset price when changing contract type
   };
@@ -79,16 +77,17 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
     setLocation('');
     setType('');
     setPrice('');
+    setContract('tutti');
     onSearch({ 
       location: '', 
       type: '', 
       price: '', 
-      contract, 
+      contract: 'tutti', 
       isMapActive 
     });
   };
 
-  const hasActiveFilters = location !== '' || type !== '' || price !== '';
+  const hasActiveFilters = location !== '' || type !== '' || price !== '' || contract !== 'tutti';
 
   const priceOptionsVendita = [
     { value: '', label: 'Qualsiasi prezzo' },
@@ -115,15 +114,27 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
     { value: '5000', label: 'Fino a € 5.000 / mese' },
   ];
 
-  const currentPriceOptions = contract === 'vendita' ? priceOptionsVendita : priceOptionsAffitto;
+  // For 'tutti' we show Vendita price options to cover the higher range
+  const currentPriceOptions = contract === 'affitto' ? priceOptionsAffitto : priceOptionsVendita;
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4">
       {/* Tab controls header row */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Permanent tabs: Vendita / Affitto */}
+          {/* Permanent tabs: Tutti / Vendita / Affitto */}
           <div className="bg-primary-dark/40 backdrop-blur-md p-1 rounded-xl inline-flex border border-white/10">
+            <button
+              type="button"
+              onClick={() => handleContractChange('tutti')}
+              className={`px-4 py-2 rounded-lg font-bold text-xs transition-colors cursor-pointer ${
+                contract === 'tutti'
+                  ? 'bg-accent text-primary-dark shadow-premium'
+                  : 'text-white hover:text-accent'
+              }`}
+            >
+              Tutti
+            </button>
             <button
               type="button"
               onClick={() => handleContractChange('vendita')}

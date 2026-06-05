@@ -44,7 +44,7 @@ function App() {
     location: string;
     type: string;
     price: string;
-    contract: 'vendita' | 'affitto';
+    contract: 'tutti' | 'vendita' | 'affitto';
     isMapActive: boolean;
   }) => {
     setFilters({
