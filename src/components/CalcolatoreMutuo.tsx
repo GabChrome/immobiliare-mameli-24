@@ -116,7 +116,7 @@ export const CalcolatoreMutuo: React.FC = () => {
   };
 
   return (
-    <section className="py-20 bg-navy-50/50 border-t border-neutral-200/50 relative overflow-hidden">
+    <section id="calcola-mutuo" className="py-20 bg-navy-50/50 border-t border-neutral-200/50 relative overflow-hidden">
       
       {/* Decorative vectors */}
       <div className="absolute top-[20%] right-[-10%] w-[400px] h-[400px] bg-accent/5 rounded-full blur-3xl pointer-events-none" />

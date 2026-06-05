@@ -53,9 +53,17 @@ function App() {
     }
   };
 
+  const handlePageChange = (page: 'home' | 'about' | 'contact') => {
+    if (currentPage === page) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      setCurrentPage(page);
+    }
+  };
+
   const handleValuateRouting = () => {
     if (currentPage === 'home') {
-      const formElement = document.getElementById('valuta-casa');
+      const formElement = document.getElementById('calcola-mutuo');
       if (formElement) {
         formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
@@ -63,7 +71,7 @@ function App() {
       setCurrentPage('home');
       // Delay scroll to allow Home page rendering first
       setTimeout(() => {
-        const formElement = document.getElementById('valuta-casa');
+        const formElement = document.getElementById('calcola-mutuo');
         if (formElement) {
           formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
@@ -105,7 +113,7 @@ function App() {
       {/* Sticky Top Header Navigation */}
       <Header
         currentPage={currentPage}
-        onPageChange={setCurrentPage}
+        onPageChange={handlePageChange}
         onValuateClick={handleValuateRouting}
       />
 
@@ -221,7 +229,7 @@ function App() {
 
       {/* Footer Section */}
       <Footer 
-        onPageChange={setCurrentPage}
+        onPageChange={handlePageChange}
         onValuateClick={handleValuateRouting}
       />
 
