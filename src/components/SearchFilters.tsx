@@ -6,15 +6,13 @@ interface SearchFiltersProps {
   filters?: {
     location: string;
     type: string;
-    minPrice: string;
-    maxPrice: string;
+    price: string;
     contract: 'tutti' | 'vendita' | 'affitto';
   };
   onSearch: (filters: { 
     location: string; 
     type: string; 
-    minPrice: string; 
-    maxPrice: string; 
+    price: string; 
     contract: 'vendita' | 'affitto'; 
     isMapActive: boolean; 
   }) => void;
@@ -33,21 +31,12 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
   const [location, setLocation] = useState('');
   const [type, setType] = useState(initialType);
   const [contract, setContract] = useState<'vendita' | 'affitto'>('vendita');
+  const [price, setPrice] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [overlapActive, setOverlapActive] = useState<'min' | 'max'>('max');
-
-  // Boundary values depending on contract type
-  const minLimit = contract === 'vendita' ? 50000 : 200;
-  const maxLimit = contract === 'vendita' ? 1000000 : 5000;
-  const step = contract === 'vendita' ? 25000 : 100;
-
-  const [minPrice, setMinPrice] = useState(minLimit);
-  const [maxPrice, setMaxPrice] = useState(maxLimit);
 
   // Sync internal state with external filters prop
   useEffect(() => {
     if (filters) {
-      // Don't overwrite if the user is focused on typing the location
       if (document.activeElement?.getAttribute('placeholder') !== 'Dove vuoi cercare?') {
         setLocation(filters.location || '');
       }
@@ -55,12 +44,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
       
       const newContract = filters.contract === 'tutti' ? 'vendita' : filters.contract;
       setContract(newContract);
-      
-      const newMinLimit = newContract === 'vendita' ? 50000 : 200;
-      const newMaxLimit = newContract === 'vendita' ? 1000000 : 5000;
-      
-      setMinPrice(filters.minPrice ? parseInt(filters.minPrice) : newMinLimit);
-      setMaxPrice(filters.maxPrice ? parseInt(filters.maxPrice) : newMaxLimit);
+      setPrice(filters.price || '');
     }
   }, [filters]);
 
@@ -70,32 +54,12 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
     loc.toLowerCase().includes(location.toLowerCase())
   );
 
-  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value);
-    if (val <= maxPrice - step) {
-      setMinPrice(val);
-    }
-  };
-
-  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = parseInt(e.target.value);
-    if (val >= minPrice + step) {
-      setMaxPrice(val);
-    }
-  };
-
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // If values are at bounds, treat them as empty (no limits)
-    const queryMinPrice = minPrice === minLimit ? '' : minPrice.toString();
-    const queryMaxPrice = maxPrice === maxLimit ? '' : maxPrice.toString();
-
     onSearch({ 
       location, 
       type, 
-      minPrice: queryMinPrice, 
-      maxPrice: queryMaxPrice, 
+      price, 
       contract, 
       isMapActive 
     });
@@ -108,51 +72,50 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
 
   const handleContractChange = (newContract: 'vendita' | 'affitto') => {
     setContract(newContract);
-    const newMin = newContract === 'vendita' ? 50000 : 200;
-    const newMax = newContract === 'vendita' ? 1000000 : 5000;
-    setMinPrice(newMin);
-    setMaxPrice(newMax);
+    setPrice(''); // Reset price when changing contract type
   };
 
   const handleResetFilters = () => {
     setLocation('');
     setType('');
-    const defaultMin = contract === 'vendita' ? 50000 : 200;
-    const defaultMax = contract === 'vendita' ? 1000000 : 5000;
-    setMinPrice(defaultMin);
-    setMaxPrice(defaultMax);
+    setPrice('');
     onSearch({ 
       location: '', 
       type: '', 
-      minPrice: '', 
-      maxPrice: '', 
+      price: '', 
       contract, 
       isMapActive 
     });
   };
 
-  const hasActiveFilters = 
-    location !== '' || 
-    type !== '' || 
-    minPrice !== (contract === 'vendita' ? 50000 : 200) || 
-    maxPrice !== (contract === 'vendita' ? 1000000 : 5000);
+  const hasActiveFilters = location !== '' || type !== '' || price !== '';
 
-  // Percentages for styling the range background bar
-  const minPercent = ((minPrice - minLimit) / (maxLimit - minLimit)) * 100;
-  const maxPercent = ((maxPrice - minLimit) / (maxLimit - minLimit)) * 100;
+  const priceOptionsVendita = [
+    { value: '', label: 'Qualsiasi prezzo' },
+    { value: '100000', label: 'Fino a € 100.000' },
+    { value: '150000', label: 'Fino a € 150.000' },
+    { value: '200000', label: 'Fino a € 200.000' },
+    { value: '250000', label: 'Fino a € 250.000' },
+    { value: '300000', label: 'Fino a € 300.000' },
+    { value: '400000', label: 'Fino a € 400.000' },
+    { value: '500000', label: 'Fino a € 500.000' },
+    { value: '750000', label: 'Fino a € 750.000' },
+    { value: '1000000', label: 'Fino a € 1.000.000' },
+  ];
 
-  // Track which slider should be on top based on mouse distance to values
-  const updateActiveThumb = (clientX: number, currentTarget: HTMLDivElement) => {
-    const rect = currentTarget.getBoundingClientRect();
-    const pct = (clientX - rect.left) / rect.width;
-    const hoverVal = minLimit + pct * (maxLimit - minLimit);
-    
-    if (Math.abs(hoverVal - minPrice) < Math.abs(hoverVal - maxPrice)) {
-      setOverlapActive('min');
-    } else {
-      setOverlapActive('max');
-    }
-  };
+  const priceOptionsAffitto = [
+    { value: '', label: 'Qualsiasi prezzo' },
+    { value: '400', label: 'Fino a € 400 / mese' },
+    { value: '600', label: 'Fino a € 600 / mese' },
+    { value: '800', label: 'Fino a € 800 / mese' },
+    { value: '1000', label: 'Fino a € 1.000 / mese' },
+    { value: '1500', label: 'Fino a € 1.500 / mese' },
+    { value: '2000', label: 'Fino a € 2.000 / mese' },
+    { value: '3000', label: 'Fino a € 3.000 / mese' },
+    { value: '5000', label: 'Fino a € 5.000 / mese' },
+  ];
+
+  const currentPriceOptions = contract === 'vendita' ? priceOptionsVendita : priceOptionsAffitto;
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4">
@@ -284,90 +247,45 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
           </div>
         </div>
 
-        {/* Draggable Price Range Line/Slider */}
+        {/* Price Dropdown Selector */}
         <div className="flex-1 flex items-center gap-3 pb-3 md:pb-0 md:pr-4">
           <Euro className="text-accent flex-shrink-0" size={20} />
           <div className="flex-1">
-            <div className="flex justify-between items-center pr-2">
-              <label className="block text-[10px] uppercase font-bold text-neutral-450 tracking-wider">
-                Fascia di Prezzo
-              </label>
-              <span className="text-xs font-bold text-primary">
-                {contract === 'vendita'
-                  ? `${minPrice === minLimit ? '€ 0' : `€ ${minPrice.toLocaleString('it-IT')}`} - ${
-                      maxPrice >= maxLimit ? 'Nessun limite' : `€ ${maxPrice.toLocaleString('it-IT')}`
-                    }`
-                  : `${minPrice === minLimit ? '€ 0' : `€ ${minPrice.toLocaleString('it-IT')}`} - ${
-                      maxPrice >= maxLimit ? 'Nessun limite' : `€ ${maxPrice.toLocaleString('it-IT')} / mese`
-                    }`
-                }
-              </span>
-            </div>
-            
-            {/* Double slider component wrapper */}
-            <div 
-              className="relative w-full h-6 mt-1.5 flex items-center"
-              onMouseMove={(e) => updateActiveThumb(e.clientX, e.currentTarget)}
-              onTouchStart={(e) => {
-                if (e.touches.length > 0) {
-                  updateActiveThumb(e.touches[0].clientX, e.currentTarget);
-                }
-              }}
+            <label className="block text-[10px] uppercase font-bold text-neutral-450 tracking-wider">
+              Prezzo Massimo
+            </label>
+            <select
+              value={price}
+              onChange={e => setPrice(e.target.value)}
+              className="w-full bg-transparent border-0 p-0 text-sm font-semibold text-navy-800 focus:ring-0 focus:outline-none mt-0.5 cursor-pointer appearance-none animate-none"
             >
-              {/* Background Track */}
-              <div className="absolute left-0 right-0 h-1.5 bg-neutral-200 rounded-lg pointer-events-none" />
-              
-              {/* Active Track Highlight */}
-              <div 
-                className="absolute h-1.5 bg-accent rounded-lg pointer-events-none"
-                style={{
-                  left: `${minPercent}%`,
-                  width: `${maxPercent - minPercent}%`
-                }}
-              />
-              
-              {/* Min Slider Input */}
-              <input
-                type="range"
-                min={minLimit}
-                max={maxLimit}
-                step={step}
-                value={minPrice}
-                onChange={handleMinChange}
-                className="range-slider-input w-full cursor-pointer"
-                style={{ zIndex: overlapActive === 'min' ? 5 : 3 }}
-              />
-              
-              {/* Max Slider Input */}
-              <input
-                type="range"
-                min={minLimit}
-                max={maxLimit}
-                step={step}
-                value={maxPrice}
-                onChange={handleMaxChange}
-                className="range-slider-input w-full cursor-pointer"
-                style={{ zIndex: overlapActive === 'max' ? 5 : 3 }}
-              />
-            </div>
+              {currentPriceOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
         {/* Submit & Reset Button area */}
         <div className="flex items-center gap-2">
-          {/* Reset Filters Icon Button */}
-          {hasActiveFilters && (
-            <motion.button
-              type="button"
-              onClick={handleResetFilters}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="p-3.5 rounded-full hover:bg-neutral-100 text-neutral-450 hover:text-accent transition-colors cursor-pointer flex items-center justify-center border border-neutral-200"
-              title="Resetta Filtri"
-            >
-              <RotateCcw size={16} />
-            </motion.button>
-          )}
+          {/* Permanent Reset Filters Icon Button */}
+          <motion.button
+            type="button"
+            onClick={handleResetFilters}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className={`p-3.5 rounded-full transition-colors cursor-pointer flex items-center justify-center border ${
+              hasActiveFilters 
+                ? 'hover:bg-neutral-100 text-neutral-450 hover:text-accent border-neutral-200' 
+                : 'text-neutral-300 border-neutral-200 opacity-60 cursor-not-allowed'
+            }`}
+            title="Resetta Filtri"
+            disabled={!hasActiveFilters}
+          >
+            <RotateCcw size={16} />
+          </motion.button>
 
           {/* Submit Search CTA Button */}
           <motion.button

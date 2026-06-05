@@ -72,16 +72,14 @@ interface FeaturedPropertiesProps {
   filters: { 
     location: string; 
     type: string; 
-    minPrice: string; 
-    maxPrice: string; 
+    price: string; 
     contract: 'tutti' | 'vendita' | 'affitto';
   };
   isMapActive: boolean;
   onUpdateFilters: (newFilters: { 
     location: string; 
     type: string; 
-    minPrice: string; 
-    maxPrice: string; 
+    price: string; 
     contract: 'tutti' | 'vendita' | 'affitto';
   }) => void;
 }
@@ -106,8 +104,7 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
     onUpdateFilters({
       ...filters,
       contract: tab,
-      minPrice: '', // reset prices when tab changes to avoid mismatched limits
-      maxPrice: '',
+      price: '', // reset price when tab changes to avoid mismatched limits
     });
   };
 
@@ -116,8 +113,7 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
     onUpdateFilters({
       location: '',
       type: '',
-      minPrice: '',
-      maxPrice: '',
+      price: '',
       contract: 'tutti',
     });
   };
@@ -146,16 +142,16 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
         if (!matchesType) return false;
       }
 
-      // 4. Price Min Filter
-      if (filters.minPrice) {
-        const minVal = parseInt(filters.minPrice);
-        if (property.priceNum < minVal) return false;
-      }
-
-      // 5. Price Max Filter
-      if (filters.maxPrice) {
-        const maxVal = parseInt(filters.maxPrice);
-        if (property.priceNum > maxVal) return false;
+      // 4. Search Select Price Filter
+      if (filters.price) {
+        const maxBudget = parseInt(filters.price);
+        if (maxBudget > 0) {
+          // Special case: if selecting an affitto price but property is vendita, filter out or vice-versa
+          if (maxBudget < 5000 && property.contract !== 'affitto') return false;
+          if (maxBudget >= 5000 && property.contract !== 'vendita') return false;
+          
+          if (property.priceNum > maxBudget) return false;
+        }
       }
 
       return true;
@@ -202,7 +198,7 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
         </div>
 
         {/* Active Filters Bar */}
-        {(filters.location || filters.type || filters.minPrice || filters.maxPrice || (filters.contract && filters.contract !== 'tutti')) && (
+        {(filters.location || filters.type || filters.price || (filters.contract && filters.contract !== 'tutti')) && (
           <div className="flex flex-wrap items-center gap-2 mb-8 bg-white p-3 rounded-2xl border border-neutral-150 shadow-premium">
             <span className="text-xs font-semibold text-navy-800 mr-2 ml-1">Filtri attivi:</span>
             
@@ -245,18 +241,12 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
               </span>
             )}
 
-            {(filters.minPrice || filters.maxPrice) && (
+            {filters.price && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-soft text-accent font-bold text-xs">
-                Prezzo: {
-                  filters.minPrice && filters.maxPrice
-                    ? `€ ${parseInt(filters.minPrice).toLocaleString('it-IT')} - € ${parseInt(filters.maxPrice).toLocaleString('it-IT')}`
-                    : filters.minPrice
-                      ? `>= € ${parseInt(filters.minPrice).toLocaleString('it-IT')}`
-                      : `<= € ${parseInt(filters.maxPrice).toLocaleString('it-IT')}`
-                }
+                Prezzo Max: {parseInt(filters.price) < 5000 ? `€ ${parseInt(filters.price).toLocaleString('it-IT')} / mese` : `€ ${parseInt(filters.price).toLocaleString('it-IT')}`}
                 <button
                   type="button"
-                  onClick={() => onUpdateFilters({ ...filters, minPrice: '', maxPrice: '' })}
+                  onClick={() => onUpdateFilters({ ...filters, price: '' })}
                   className="hover:text-accent-dark font-bold cursor-pointer text-sm"
                 >
                   ×

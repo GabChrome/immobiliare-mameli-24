@@ -7,15 +7,13 @@ interface HeroProps {
   filters?: {
     location: string;
     type: string;
-    minPrice: string;
-    maxPrice: string;
+    price: string;
     contract: 'tutti' | 'vendita' | 'affitto';
   };
   onSearch: (filters: { 
     location: string; 
     type: string; 
-    minPrice: string; 
-    maxPrice: string; 
+    price: string; 
     contract: 'vendita' | 'affitto'; 
     isMapActive: boolean; 
   }) => void;
