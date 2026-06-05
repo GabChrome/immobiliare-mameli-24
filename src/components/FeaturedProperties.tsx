@@ -73,12 +73,25 @@ const mockProperties: Property[] = [
   },
 ];
 
+interface FeaturedPropertiesProps {
+  onContactClick: (propertyTitle: string) => void;
+  filters: { location: string; type: string; price: string };
+  isMapActive: boolean;
+  onUpdateFilters: (newFilters: { location: string; type: string; price: string }) => void;
+}
+
 export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
   onContactClick,
   filters,
   isMapActive,
+  onUpdateFilters,
 }) => {
   const [activeTab, setActiveTab] = useState<'tutti' | 'vendita' | 'affitto'>('tutti');
+
+  const handleResetAll = () => {
+    setActiveTab('tutti');
+    onUpdateFilters({ location: '', type: '', price: '' });
+  };
 
   const filteredProperties = useMemo(() => {
     return mockProperties.filter(property => {
@@ -160,6 +173,56 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
           )}
         </div>
 
+        {/* Active Filters Bar */}
+        {(filters.location || filters.type || filters.price) && (
+          <div className="flex flex-wrap items-center gap-2 mb-8 bg-white p-3 rounded-2xl border border-neutral-150 shadow-premium">
+            <span className="text-xs font-semibold text-navy-800 mr-2 ml-1">Filtri attivi:</span>
+            {filters.location && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-soft text-accent font-bold text-xs">
+                Località: {filters.location}
+                <button
+                  type="button"
+                  onClick={() => onUpdateFilters({ ...filters, location: '' })}
+                  className="hover:text-accent-dark font-bold cursor-pointer text-sm"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+            {filters.type && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-soft text-accent font-bold text-xs capitalize">
+                Tipologia: {filters.type}
+                <button
+                  type="button"
+                  onClick={() => onUpdateFilters({ ...filters, type: '' })}
+                  className="hover:text-accent-dark font-bold cursor-pointer text-sm"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+            {filters.price && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-soft text-accent font-bold text-xs">
+                Prezzo Max: {parseInt(filters.price) < 5000 ? `€ ${parseInt(filters.price).toLocaleString('it-IT')} / mese` : `€ ${parseInt(filters.price).toLocaleString('it-IT')}`}
+                <button
+                  type="button"
+                  onClick={() => onUpdateFilters({ ...filters, price: '' })}
+                  className="hover:text-accent-dark font-bold cursor-pointer text-sm"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={handleResetAll}
+              className="text-xs font-bold text-neutral-450 hover:text-accent ml-auto mr-1 cursor-pointer transition-colors"
+            >
+              Cancella Tutti
+            </button>
+          </div>
+        )}
+
         {/* Results grid container */}
         <AnimatePresence mode="wait">
           {filteredProperties.length > 0 ? (
@@ -200,8 +263,8 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
                 Nessuna proprietà corrisponde ai filtri di ricerca selezionati. Prova a reimpostare la località o a modificare la tipologia.
               </p>
               <button
-                onClick={() => setActiveTab('tutti')}
-                className="mt-6 py-2 px-5 rounded-xl bg-primary text-white hover:bg-primary-light transition-colors text-xs font-semibold"
+                onClick={handleResetAll}
+                className="mt-6 py-2 px-5 rounded-xl bg-primary text-white hover:bg-primary-light transition-colors text-xs font-semibold cursor-pointer"
               >
                 Reimposta filtri
               </button>

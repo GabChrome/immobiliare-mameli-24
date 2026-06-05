@@ -178,6 +178,7 @@ function App() {
                   <FeaturedProperties
                     filters={filters}
                     isMapActive={isMapActive}
+                    onUpdateFilters={setFilters}
                     onContactClick={(propertyTitle) => {
                       setContactModalProp(propertyTitle);
                       setContactForm({ name: '', email: '', phone: '', message: `Salve, desidero maggiori informazioni in merito all'immobile "${propertyTitle}".` });
