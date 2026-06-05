@@ -77,3 +77,62 @@ html {
   background-image: radial-gradient(circle, #cbd5e1 1.5px, transparent 1.5px);
   background-size: 24px 24px;
 }
+
+/* Custom Double-Handle Range Slider CSS */
+.range-slider-input {
+  position: absolute;
+  width: 100%;
+  pointer-events: none;
+  background: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  margin: 0;
+}
+
+.range-slider-input::-webkit-slider-thumb {
+  pointer-events: auto;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #00A8E8; /* --color-accent */
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+.range-slider-input::-webkit-slider-thumb:hover {
+  transform: scale(1.15);
+  background-color: #0084B4; /* --color-accent-hover */
+}
+
+.range-slider-input::-webkit-slider-thumb:active {
+  transform: scale(0.95);
+}
+
+.range-slider-input::-moz-range-thumb {
+  pointer-events: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #00A8E8; /* --color-accent */
+  border: 2px solid #FFFFFF;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+.range-slider-input::-moz-range-thumb:hover {
+  transform: scale(1.15);
+  background-color: #0084B4; /* --color-accent-hover */
+}
+
+.range-slider-input::-moz-range-thumb:active {
+  transform: scale(0.95);
+}
+

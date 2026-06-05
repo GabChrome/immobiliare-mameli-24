@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
-import { MapPin, Building, Euro, Search, Map } from 'lucide-react';
+import { MapPin, Building, Euro, Search, Map, RotateCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface SearchFiltersProps {
-  onSearch: (filters: { location: string; type: string; price: string; isMapActive: boolean }) => void;
+  onSearch: (filters: { 
+    location: string; 
+    type: string; 
+    minPrice: string; 
+    maxPrice: string; 
+    contract: 'vendita' | 'affitto'; 
+    isMapActive: boolean; 
+  }) => void;
   isMapActive: boolean;
   onMapToggle: (active: boolean) => void;
   initialType?: string;
@@ -17,8 +24,16 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
 }) => {
   const [location, setLocation] = useState('');
   const [type, setType] = useState(initialType);
-  const [price, setPrice] = useState('');
+  const [contract, setContract] = useState<'vendita' | 'affitto'>('vendita');
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Boundary values depending on contract type
+  const minLimit = contract === 'vendita' ? 50000 : 200;
+  const maxLimit = contract === 'vendita' ? 1000000 : 5000;
+  const step = contract === 'vendita' ? 25000 : 100;
+
+  const [minPrice, setMinPrice] = useState(minLimit);
+  const [maxPrice, setMaxPrice] = useState(maxLimit);
 
   const locations = ['Busto Arsizio', 'Gallarate', 'Milano', 'Legnano', 'Castellanza', 'Olgiate Olona'];
   
@@ -26,9 +41,35 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
     loc.toLowerCase().includes(location.toLowerCase())
   );
 
+  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value);
+    if (val <= maxPrice - step) {
+      setMinPrice(val);
+    }
+  };
+
+  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseInt(e.target.value);
+    if (val >= minPrice + step) {
+      setMaxPrice(val);
+    }
+  };
+
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch({ location, type, price, isMapActive });
+    
+    // If values are at bounds, treat them as empty (no limits)
+    const queryMinPrice = minPrice === minLimit ? '' : minPrice.toString();
+    const queryMaxPrice = maxPrice === maxLimit ? '' : maxPrice.toString();
+
+    onSearch({ 
+      location, 
+      type, 
+      minPrice: queryMinPrice, 
+      maxPrice: queryMaxPrice, 
+      contract, 
+      isMapActive 
+    });
   };
 
   const handleSuggestionClick = (loc: string) => {
@@ -36,37 +77,101 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
     setShowSuggestions(false);
   };
 
+  const handleContractChange = (newContract: 'vendita' | 'affitto') => {
+    setContract(newContract);
+    const newMin = newContract === 'vendita' ? 50000 : 200;
+    const newMax = newContract === 'vendita' ? 1000000 : 5000;
+    setMinPrice(newMin);
+    setMaxPrice(newMax);
+  };
+
+  const handleResetFilters = () => {
+    setLocation('');
+    setType('');
+    const defaultMin = contract === 'vendita' ? 50000 : 200;
+    const defaultMax = contract === 'vendita' ? 1000000 : 5000;
+    setMinPrice(defaultMin);
+    setMaxPrice(defaultMax);
+    onSearch({ 
+      location: '', 
+      type: '', 
+      minPrice: '', 
+      maxPrice: '', 
+      contract, 
+      isMapActive 
+    });
+  };
+
+  const hasActiveFilters = 
+    location !== '' || 
+    type !== '' || 
+    minPrice !== (contract === 'vendita' ? 50000 : 200) || 
+    maxPrice !== (contract === 'vendita' ? 1000000 : 5000);
+
+  // Percentages for styling the range background bar
+  const minPercent = ((minPrice - minLimit) / (maxLimit - minLimit)) * 100;
+  const maxPercent = ((maxPrice - minLimit) / (maxLimit - minLimit)) * 100;
+
   return (
     <div className="w-full max-w-5xl mx-auto px-4">
-      {/* Tab controls or header */}
+      {/* Tab controls header row */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-        <div className="bg-primary-dark/40 backdrop-blur-md p-1 rounded-xl inline-flex border border-white/10">
-          <button
-            type="button"
-            onClick={() => onMapToggle(false)}
-            className={`px-4 py-2 rounded-lg font-medium text-xs transition-colors ${
-              !isMapActive
-                ? 'bg-accent text-primary-dark shadow-premium'
-                : 'text-white hover:text-accent'
-            }`}
-          >
-            Lista Annunci
-          </button>
-          <button
-            type="button"
-            onClick={() => onMapToggle(true)}
-            className={`px-4 py-2 rounded-lg font-medium text-xs flex items-center gap-1.5 transition-colors ${
-              isMapActive
-                ? 'bg-accent text-primary-dark shadow-premium'
-                : 'text-white hover:text-accent'
-            }`}
-          >
-            <Map size={14} />
-            Mappa Interattiva
-          </button>
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Vendita / Affitto Tabs */}
+          <div className="bg-primary-dark/40 backdrop-blur-md p-1 rounded-xl inline-flex border border-white/10">
+            <button
+              type="button"
+              onClick={() => handleContractChange('vendita')}
+              className={`px-4 py-2 rounded-lg font-bold text-xs transition-colors cursor-pointer ${
+                contract === 'vendita'
+                  ? 'bg-accent text-primary-dark shadow-premium'
+                  : 'text-white hover:text-accent'
+              }`}
+            >
+              Vendita
+            </button>
+            <button
+              type="button"
+              onClick={() => handleContractChange('affitto')}
+              className={`px-4 py-2 rounded-lg font-bold text-xs transition-colors cursor-pointer ${
+                contract === 'affitto'
+                  ? 'bg-accent text-primary-dark shadow-premium'
+                  : 'text-white hover:text-accent'
+              }`}
+            >
+              Affitto
+            </button>
+          </div>
+
+          {/* List / Map Toggle Tabs */}
+          <div className="bg-primary-dark/40 backdrop-blur-md p-1 rounded-xl inline-flex border border-white/10">
+            <button
+              type="button"
+              onClick={() => onMapToggle(false)}
+              className={`px-4 py-2 rounded-lg font-bold text-xs transition-colors cursor-pointer ${
+                !isMapActive
+                  ? 'bg-accent text-primary-dark shadow-premium'
+                  : 'text-white hover:text-accent'
+              }`}
+            >
+              Lista Annunci
+            </button>
+            <button
+              type="button"
+              onClick={() => onMapToggle(true)}
+              className={`px-4 py-2 rounded-lg font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer ${
+                isMapActive
+                  ? 'bg-accent text-primary-dark shadow-premium'
+                  : 'text-white hover:text-accent'
+              }`}
+            >
+              <Map size={14} />
+              Mappa Interattiva
+            </button>
+          </div>
         </div>
 
-        <span className="text-white/80 text-xs font-medium bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/5 hidden sm:inline-block">
+        <span className="text-white/80 text-xs font-semibold bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/5 hidden lg:inline-block">
           ⚡ Oltre <span className="text-accent font-bold">120+ immobili</span> disponibili oggi
         </span>
       </div>
@@ -105,7 +210,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                   key={idx}
                   type="button"
                   onMouseDown={() => handleSuggestionClick(loc)}
-                  className="w-full text-left px-4 py-2.5 rounded-xl hover:bg-neutral-50 text-xs font-semibold text-navy-800 transition-colors flex items-center gap-2"
+                  className="w-full text-left px-4 py-2.5 rounded-xl hover:bg-neutral-50 text-xs font-semibold text-navy-800 transition-colors flex items-center gap-2 cursor-pointer"
                 >
                   <MapPin size={14} className="text-neutral-450" />
                   {loc}
@@ -125,7 +230,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
             <select
               value={type}
               onChange={e => setType(e.target.value)}
-              className="w-full bg-transparent border-0 p-0 text-sm font-semibold text-navy-800 focus:ring-0 focus:outline-none mt-0.5 cursor-pointer appearance-none"
+              className="w-full bg-transparent border-0 p-0 text-sm font-semibold text-navy-800 focus:ring-0 focus:outline-none mt-0.5 cursor-pointer appearance-none animate-none"
             >
               <option value="">Tutte le tipologie</option>
               <option value="appartamento">Appartamento</option>
@@ -137,39 +242,94 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
           </div>
         </div>
 
-        {/* Max Budget Dropdown */}
+        {/* Draggable Price Range Line/Slider */}
         <div className="flex-1 flex items-center gap-3 pb-3 md:pb-0 md:pr-4">
           <Euro className="text-accent flex-shrink-0" size={20} />
           <div className="flex-1">
-            <label className="block text-[10px] uppercase font-bold text-neutral-450 tracking-wider">
-              Prezzo Massimo
-            </label>
-            <select
-              value={price}
-              onChange={e => setPrice(e.target.value)}
-              className="w-full bg-transparent border-0 p-0 text-sm font-semibold text-navy-800 focus:ring-0 focus:outline-none mt-0.5 cursor-pointer appearance-none"
-            >
-              <option value="">Nessun limite</option>
-              <option value="150000">€ 150.000</option>
-              <option value="250000">€ 250.000</option>
-              <option value="350000">€ 350.000</option>
-              <option value="500000">€ 500.000</option>
-              <option value="750000">€ 750.000</option>
-              <option value="1500">€ 1.500 / mese (Affitto)</option>
-            </select>
+            <div className="flex justify-between items-center pr-2">
+              <label className="block text-[10px] uppercase font-bold text-neutral-450 tracking-wider">
+                Fascia di Prezzo
+              </label>
+              <span className="text-xs font-bold text-primary">
+                {contract === 'vendita'
+                  ? `${minPrice === minLimit ? '€ 0' : `€ ${minPrice.toLocaleString('it-IT')}`} - ${
+                      maxPrice >= maxLimit ? 'Nessun limite' : `€ ${maxPrice.toLocaleString('it-IT')}`
+                    }`
+                  : `${minPrice === minLimit ? '€ 0' : `€ ${minPrice.toLocaleString('it-IT')}`} - ${
+                      maxPrice >= maxLimit ? 'Nessun limite' : `€ ${maxPrice.toLocaleString('it-IT')} / mese`
+                    }`
+                }
+              </span>
+            </div>
+            
+            {/* Double slider component wrapper */}
+            <div className="relative w-full h-6 mt-1.5 flex items-center">
+              {/* Background Track */}
+              <div className="absolute left-0 right-0 h-1.5 bg-neutral-200 rounded-lg pointer-events-none" />
+              
+              {/* Active Track Highlight */}
+              <div 
+                className="absolute h-1.5 bg-accent rounded-lg pointer-events-none"
+                style={{
+                  left: `${minPercent}%`,
+                  width: `${maxPercent - minPercent}%`
+                }}
+              />
+              
+              {/* Min Slider Input */}
+              <input
+                type="range"
+                min={minLimit}
+                max={maxLimit}
+                step={step}
+                value={minPrice}
+                onChange={handleMinChange}
+                className="range-slider-input w-full cursor-pointer"
+                style={{ zIndex: minPrice > maxLimit - (maxLimit - minLimit) * 0.1 ? 5 : 3 }}
+              />
+              
+              {/* Max Slider Input */}
+              <input
+                type="range"
+                min={minLimit}
+                max={maxLimit}
+                step={step}
+                value={maxPrice}
+                onChange={handleMaxChange}
+                className="range-slider-input w-full cursor-pointer"
+                style={{ zIndex: minPrice > maxLimit - (maxLimit - minLimit) * 0.1 ? 3 : 5 }}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Submit Search CTA Button */}
-        <motion.button
-          type="submit"
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.98 }}
-          className="py-4 md:py-3.5 px-8 rounded-xl md:rounded-full bg-primary text-white hover:bg-primary-light transition-colors font-semibold text-sm flex items-center justify-center gap-2 shadow-premium border border-primary/20"
-        >
-          <Search size={16} className="text-accent" />
-          <span>Cerca</span>
-        </motion.button>
+        {/* Submit & Reset Button area */}
+        <div className="flex items-center gap-2">
+          {/* Reset Filters Icon Button */}
+          {hasActiveFilters && (
+            <motion.button
+              type="button"
+              onClick={handleResetFilters}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="p-3.5 rounded-full hover:bg-neutral-100 text-neutral-450 hover:text-accent transition-colors cursor-pointer flex items-center justify-center border border-neutral-200"
+              title="Resetta Filtri"
+            >
+              <RotateCcw size={16} />
+            </motion.button>
+          )}
+
+          {/* Submit Search CTA Button */}
+          <motion.button
+            type="submit"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.98 }}
+            className="py-4 md:py-3.5 px-8 rounded-xl md:rounded-full bg-primary text-white hover:bg-primary-light transition-colors font-semibold text-sm flex items-center justify-center gap-2 shadow-premium border border-primary/20 cursor-pointer"
+          >
+            <Search size={16} className="text-accent" />
+            <span>Cerca</span>
+          </motion.button>
+        </div>
       </form>
     </div>
   );

@@ -14,7 +14,9 @@ import { X, Send, CheckCircle, Terminal, User } from 'lucide-react';
 interface FilterState {
   location: string;
   type: string;
-  price: string;
+  minPrice: string;
+  maxPrice: string;
+  contract: 'tutti' | 'vendita' | 'affitto';
 }
 
 function App() {
@@ -22,7 +24,9 @@ function App() {
   const [filters, setFilters] = useState<FilterState>({
     location: '',
     type: '',
-    price: '',
+    minPrice: '',
+    maxPrice: '',
+    contract: 'tutti',
   });
   
   const [isMapActive, setIsMapActive] = useState(false);
@@ -38,11 +42,20 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentPage]);
 
-  const handleSearchSubmit = (searchParams: FilterState & { isMapActive: boolean }) => {
+  const handleSearchSubmit = (searchParams: {
+    location: string;
+    type: string;
+    minPrice: string;
+    maxPrice: string;
+    contract: 'vendita' | 'affitto';
+    isMapActive: boolean;
+  }) => {
     setFilters({
       location: searchParams.location,
       type: searchParams.type,
-      price: searchParams.price,
+      minPrice: searchParams.minPrice,
+      maxPrice: searchParams.maxPrice,
+      contract: searchParams.contract,
     });
     setIsMapActive(searchParams.isMapActive);
 

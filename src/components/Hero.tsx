@@ -4,7 +4,14 @@ import { SearchFilters } from './SearchFilters';
 import { Video, Award } from 'lucide-react';
 
 interface HeroProps {
-  onSearch: (filters: { location: string; type: string; price: string; isMapActive: boolean }) => void;
+  onSearch: (filters: { 
+    location: string; 
+    type: string; 
+    minPrice: string; 
+    maxPrice: string; 
+    contract: 'vendita' | 'affitto'; 
+    isMapActive: boolean; 
+  }) => void;
   isMapActive: boolean;
   onMapToggle: (active: boolean) => void;
 }

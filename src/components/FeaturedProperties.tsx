@@ -1,14 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { PropertyCard } from './PropertyCard';
 import type { Property } from './PropertyCard';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Home, Sparkles } from 'lucide-react';
-
-interface FeaturedPropertiesProps {
-  onContactClick: (propertyTitle: string) => void;
-  filters: { location: string; type: string; price: string };
-  isMapActive: boolean;
-}
 
 const mockProperties: Property[] = [
   {
@@ -75,9 +69,21 @@ const mockProperties: Property[] = [
 
 interface FeaturedPropertiesProps {
   onContactClick: (propertyTitle: string) => void;
-  filters: { location: string; type: string; price: string };
+  filters: { 
+    location: string; 
+    type: string; 
+    minPrice: string; 
+    maxPrice: string; 
+    contract: 'tutti' | 'vendita' | 'affitto';
+  };
   isMapActive: boolean;
-  onUpdateFilters: (newFilters: { location: string; type: string; price: string }) => void;
+  onUpdateFilters: (newFilters: { 
+    location: string; 
+    type: string; 
+    minPrice: string; 
+    maxPrice: string; 
+    contract: 'tutti' | 'vendita' | 'affitto';
+  }) => void;
 }
 
 export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
@@ -88,9 +94,32 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'tutti' | 'vendita' | 'affitto'>('tutti');
 
+  // Sync activeTab with filters.contract if it changes globally (e.g. from Hero search)
+  useEffect(() => {
+    if (filters.contract) {
+      setActiveTab(filters.contract);
+    }
+  }, [filters.contract]);
+
+  const handleTabChange = (tab: 'tutti' | 'vendita' | 'affitto') => {
+    setActiveTab(tab);
+    onUpdateFilters({
+      ...filters,
+      contract: tab,
+      minPrice: '', // reset prices when tab changes to avoid mismatched limits
+      maxPrice: '',
+    });
+  };
+
   const handleResetAll = () => {
     setActiveTab('tutti');
-    onUpdateFilters({ location: '', type: '', price: '' });
+    onUpdateFilters({
+      location: '',
+      type: '',
+      minPrice: '',
+      maxPrice: '',
+      contract: 'tutti',
+    });
   };
 
   const filteredProperties = useMemo(() => {
@@ -112,22 +141,21 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
       // 3. Search Select Type Filter
       if (filters.type) {
         const query = filters.type.toLowerCase();
-        // Check if property title contains type or is mapped roughly
         const matchesType = property.title.toLowerCase().includes(query) || 
           (query === 'appartamento' && (property.title.toLowerCase().includes('trilocale') || property.title.toLowerCase().includes('bilocale')));
         if (!matchesType) return false;
       }
 
-      // 4. Search Select Price Filter
-      if (filters.price) {
-        const maxBudget = parseInt(filters.price);
-        if (maxBudget > 0) {
-          // Special case: if selecting an affitto price but property is vendita, filter out or vice-versa
-          if (maxBudget < 5000 && property.contract !== 'affitto') return false;
-          if (maxBudget >= 5000 && property.contract !== 'vendita') return false;
-          
-          if (property.priceNum > maxBudget) return false;
-        }
+      // 4. Price Min Filter
+      if (filters.minPrice) {
+        const minVal = parseInt(filters.minPrice);
+        if (property.priceNum < minVal) return false;
+      }
+
+      // 5. Price Max Filter
+      if (filters.maxPrice) {
+        const maxVal = parseInt(filters.maxPrice);
+        if (property.priceNum > maxVal) return false;
       }
 
       return true;
@@ -159,8 +187,8 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
               {(['tutti', 'vendita', 'affitto'] as const).map((tab) => (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-6 py-2.5 rounded-xl font-bold text-xs capitalize transition-colors ${
+                  onClick={() => handleTabChange(tab)}
+                  className={`px-6 py-2.5 rounded-xl font-bold text-xs capitalize transition-colors cursor-pointer ${
                     activeTab === tab
                       ? 'bg-primary text-white shadow-premium'
                       : 'text-neutral-450 hover:text-navy-800'
@@ -174,9 +202,23 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
         </div>
 
         {/* Active Filters Bar */}
-        {(filters.location || filters.type || filters.price) && (
+        {(filters.location || filters.type || filters.minPrice || filters.maxPrice || (filters.contract && filters.contract !== 'tutti')) && (
           <div className="flex flex-wrap items-center gap-2 mb-8 bg-white p-3 rounded-2xl border border-neutral-150 shadow-premium">
             <span className="text-xs font-semibold text-navy-800 mr-2 ml-1">Filtri attivi:</span>
+            
+            {filters.contract && filters.contract !== 'tutti' && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-soft text-accent font-bold text-xs capitalize">
+                Contratto: {filters.contract}
+                <button
+                  type="button"
+                  onClick={() => handleTabChange('tutti')}
+                  className="hover:text-accent-dark font-bold cursor-pointer text-sm"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+
             {filters.location && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-soft text-accent font-bold text-xs">
                 Località: {filters.location}
@@ -189,6 +231,7 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
                 </button>
               </span>
             )}
+
             {filters.type && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-soft text-accent font-bold text-xs capitalize">
                 Tipologia: {filters.type}
@@ -201,18 +244,26 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
                 </button>
               </span>
             )}
-            {filters.price && (
+
+            {(filters.minPrice || filters.maxPrice) && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-soft text-accent font-bold text-xs">
-                Prezzo Max: {parseInt(filters.price) < 5000 ? `€ ${parseInt(filters.price).toLocaleString('it-IT')} / mese` : `€ ${parseInt(filters.price).toLocaleString('it-IT')}`}
+                Prezzo: {
+                  filters.minPrice && filters.maxPrice
+                    ? `€ ${parseInt(filters.minPrice).toLocaleString('it-IT')} - € ${parseInt(filters.maxPrice).toLocaleString('it-IT')}`
+                    : filters.minPrice
+                      ? `>= € ${parseInt(filters.minPrice).toLocaleString('it-IT')}`
+                      : `<= € ${parseInt(filters.maxPrice).toLocaleString('it-IT')}`
+                }
                 <button
                   type="button"
-                  onClick={() => onUpdateFilters({ ...filters, price: '' })}
+                  onClick={() => onUpdateFilters({ ...filters, minPrice: '', maxPrice: '' })}
                   className="hover:text-accent-dark font-bold cursor-pointer text-sm"
                 >
                   ×
                 </button>
               </span>
             )}
+
             <button
               type="button"
               onClick={handleResetAll}
