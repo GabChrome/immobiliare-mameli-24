@@ -101,10 +101,21 @@ export const FeaturedProperties: React.FC<FeaturedPropertiesProps> = ({
 
   const handleTabChange = (tab: 'tutti' | 'vendita' | 'affitto') => {
     setActiveTab(tab);
+    
+    // Keep price if it is compatible, otherwise clear it
+    let newPrice = filters.price;
+    if (tab === 'affitto') {
+      const isValidRent = ['400', '600', '800', '1000', '1500', '2000', '3000', '5000'].includes(filters.price);
+      if (!isValidRent) newPrice = '';
+    } else {
+      const isValidSale = ['100000', '150000', '200000', '250000', '300000', '400000', '500000', '750000', '1000000'].includes(filters.price);
+      if (!isValidSale) newPrice = '';
+    }
+
     onUpdateFilters({
       ...filters,
       contract: tab,
-      price: '', // reset price when tab changes to avoid mismatched limits
+      price: newPrice,
     });
   };
 

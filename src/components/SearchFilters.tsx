@@ -70,7 +70,16 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
 
   const handleContractChange = (newContract: 'tutti' | 'vendita' | 'affitto') => {
     setContract(newContract);
-    setPrice(''); // Reset price when changing contract type
+    
+    // Keep price if it is compatible, otherwise clear it
+    if (newContract === 'affitto') {
+      const isValidRent = ['400', '600', '800', '1000', '1500', '2000', '3000', '5000'].includes(price);
+      if (!isValidRent) setPrice('');
+    } else {
+      // vendita or tutti
+      const isValidSale = ['100000', '150000', '200000', '250000', '300000', '400000', '500000', '750000', '1000000'].includes(price);
+      if (!isValidSale) setPrice('');
+    }
   };
 
   const handleResetFilters = () => {
