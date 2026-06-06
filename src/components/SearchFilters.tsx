@@ -289,7 +289,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
         </div>
 
         {/* Submit & Reset Button area */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full md:w-auto">
           {/* Permanent Reset Filters Icon Button */}
           <motion.button
             type="button"
@@ -312,7 +312,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
             type="submit"
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.98 }}
-            className="py-4 md:py-3.5 px-8 rounded-xl md:rounded-full bg-primary text-white hover:bg-primary-light transition-colors font-semibold text-sm flex items-center justify-center gap-2 shadow-premium border border-primary/20 cursor-pointer"
+            className="flex-1 md:flex-none py-4 md:py-3.5 px-8 rounded-xl md:rounded-full bg-primary text-white hover:bg-primary-light transition-colors font-semibold text-sm flex items-center justify-center gap-2 shadow-premium border border-primary/20 cursor-pointer"
           >
             <Search size={16} className="text-accent" />
             <span>Cerca</span>

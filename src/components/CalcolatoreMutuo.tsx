@@ -316,7 +316,7 @@ export const CalcolatoreMutuo: React.FC = () => {
                       placeholder="Nome completo..."
                       className="w-full rounded-xl bg-white/10 border border-white/10 px-4 py-2.5 text-xs text-white placeholder-neutral-300 focus:outline-none focus:border-accent focus:bg-white/15 transition-all"
                     />
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <input
                         type="tel"
                         required
